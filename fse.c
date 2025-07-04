@@ -84,26 +84,36 @@ int8 *securerand(int16 size) {
 int8 *readkey(char *prompt){
     char buf[256];
     int8 *p;
-    int8 size, idx;
+    int8 size;
 
+    // Prompt
     printf("%s ", prompt);
     fflush(stdout);
-    memset(buf, 0, 256);
-    read(0, buf, 255);
-    size = (int8)strlen(buf);
 
-    // abcd\n = 5
-    // 01234
+    // Read up to 255 chars
+    memset(buf, 0, sizeof buf);
+    ssize_t r = read(STDIN_FILENO, buf, sizeof(buf)-1);
+    if (r <= 0) {
+        perror("read");
+        return NULL;
+    }
 
-    idx = size - 1;
-    p = (int8 *)buf + idx;
-    *p = 0;
-    
-    p = (int8 *)malloc(size);
+    // Strip trailing newline, if present
+    size = (int8)r;
+    if (buf[size-1] == '\n') {
+        buf[size-1] = '\0';
+        size--;
+    }
+
+    // Allocate exactly size+1 bytes (including NUL)
+    p = malloc(size+1);
     assert(p);
-    strncpy(p, buf, idx);
 
-    return 0;
+    // Copy and NUL-terminate
+    memcpy(p, buf, size);
+    p[size] = '\0';
+
+    return p;
 }
 
 int main(int argc, char *argv[]){
@@ -140,8 +150,8 @@ int main(int argc, char *argv[]){
         return -1;
     }
 
-    // key = readkey("Key: ");
-    // assert(key);
+    key = readkey("Key: ");
+    assert(key);
     
     keysize = (int16)strlen((char *)key);
     padsize8 = securerand(2);
