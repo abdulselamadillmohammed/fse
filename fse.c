@@ -81,6 +81,30 @@ int8 *securerand(int16 size) {
     }
 }
 
+int8 *readkey(char *prompt){
+    char buf[256];
+    int8 *p;
+    int8 size, idx;
+
+    printf("%s ", prompt);
+    fflush(stdout);
+    memset(buf, 0, 256);
+    read(0, buf, 255);
+    size = (int8)strlen(buf);
+
+    // abcd\n = 5
+    // 01234
+
+    idx = size - 1;
+    p = (int8 *)buf + idx;
+    *p = 0;
+    
+    p = (int8 *)malloc(size);
+    assert(p);
+    strncpy(p, buf, idx);
+
+    return 0;
+}
 
 int main(int argc, char *argv[]){
     Arcfour *rc4;
