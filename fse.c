@@ -1,6 +1,26 @@
 /* fse.c */
 #include "fse.h"
 
+void changeecho(bool enabled){
+    struct termios *t;
+
+    t = (struct termios *)malloc(sizeof(
+        struct termios));
+
+
+    tcgetattr(0, t);
+    if (enabled)
+        t->c_lflag |= ECHO;
+    else
+        t->c_lflag &= ECHO;
+
+    tcsetattr(0, 0, t);
+    
+    free(t);
+    return;
+
+}
+
 // int8 *securerand(int16 size){
 //     int8 *start, *p;
 //     size_t n;
@@ -90,6 +110,7 @@ int8 *readkey(char *prompt){
     printf("%s ", prompt);
     fflush(stdout);
 
+    changeecho(false);
     // Read up to 255 chars
     memset(buf, 0, sizeof buf);
     ssize_t r = read(STDIN_FILENO, buf, sizeof(buf)-1);
@@ -112,6 +133,7 @@ int8 *readkey(char *prompt){
     // Copy and NUL-terminate
     memcpy(p, buf, size);
     p[size] = '\0';
+    changeecho(true);    
 
     return p;
 }
@@ -157,7 +179,7 @@ int main(int argc, char *argv[]){
     padsize8 = securerand(2);
     padsize16 = (int16 *) padsize8;
     padsize = *padsize16;
-    printf("padsize: %d\n", (int)padsize);
+    // printf("padsize: %d\n", (int)padsize);
 
     close(infd);
     close(outfd);

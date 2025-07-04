@@ -9,7 +9,10 @@
 #include <fcntl.h>
 #include <assert.h>
 #include <sys/random.h>
+#include <termios.h>
+#include <stdbool.h>
 
+void changeecho(bool);
 int8 *securerand(int16);
 int8 *readkey(char*);
 int main(int, char**);
